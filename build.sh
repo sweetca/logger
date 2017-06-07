@@ -4,7 +4,7 @@ DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 
 # install UI
 cd $DIR/frontend/
-#npm install -g create-react-app
+npm install -g create-react-app
 npm install
 npm run build
 cd $DIR

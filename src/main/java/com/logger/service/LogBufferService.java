@@ -19,8 +19,8 @@ public class LogBufferService {
 
     @PostConstruct
     public void init() {
-        dataSize = interval;
-        buffer = new Vector(dataSize, interval);
+        dataSize = interval * 1000;
+        buffer = new Vector(dataSize, interval * 1000);
     }
 
     public synchronized List<Log> getLastPeriod(Integer requestedInterval) {
@@ -28,7 +28,7 @@ public class LogBufferService {
 
         int size = buffer.size() - 1;
         long diff = System.currentTimeMillis() - (requestedInterval == null
-                ? interval : requestedInterval.intValue() * 1000);
+                ? interval * 1000 : requestedInterval.intValue() * 1000);
         boolean end = false;
 
         while (size >= 0 && !end) {
