@@ -1,0 +1,79 @@
+@import '../app.scss';
+
+.Content {
+    display: flex;
+    flex-direction: column;
+
+    width: 90%;
+    padding: $size-s 5%;
+    height: auto;
+    min-height: calc( 100vh - ( #{$size-m} + #{$size-l} + #{$size-s} * 2) );
+
+    .navigation {
+        display: flex;
+        flex-direction: row;
+
+        a {
+            display: flex;
+            color: white;
+            border-radius: 3px;
+            padding: 4px 6px;
+            margin-right: 15px;
+            box-shadow: 7px 5px 5px 0px rgba(0, 0, 0, 0.5);
+        }
+
+        form {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+
+            input {
+                padding: 4px;
+                border-radius: 3px;
+                border: 1px solid #acacac;
+                margin: 0 10px;
+                width: 100px;
+                box-shadow: 7px 5px 5px 0px rgba(0, 0, 0, 0.5);
+                font-weight: 700;
+            }
+        }
+
+        .actionBtn {
+            background: #f14c4e;
+        }
+        .actionBtn:hover {
+            background: #ed1d1f;
+        }
+        .refreshBtn {
+            border: 1px solid #acacac;
+            padding: 2px;
+            justify-content: center;
+            align-items: center;
+        }
+        .refreshImg {
+            width: 20px;
+            height: auto;
+            align-self: center;
+        }
+    }
+
+    .loaderBox {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+        height: calc( 100vh - ( #{$size-m} + #{$size-l} + #{$size-s} * 2) );
+
+        .loader {
+            display: flex;
+            animation: loader-spin infinite 20s linear;
+            height: $size-xl;
+            width: auto;
+        }
+    }
+}
+
+@keyframes loader-spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}

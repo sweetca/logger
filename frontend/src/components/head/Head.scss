@@ -1,0 +1,16 @@
+@import '../../app.scss';
+
+.Head {
+    @include rowBar();
+    height: $size-l;
+    flex-direction: row;
+    justify-content: flex-end;
+
+    img {
+        display: flex;
+        width: auto;
+        margin-top: 1em;
+        height: 4em;
+        box-shadow: 7px 5px 5px 0px rgba(0, 0, 0, 0.5);
+    }
+}

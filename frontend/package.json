@@ -1,0 +1,32 @@
+{
+  "name": "logger",
+  "version": "1.0.0",
+  "description": "viaplay series",
+  "main": "index.js",
+  "scripts": {
+    "build-css": "node-sass src/ -o src/",
+    "watch-css": "npm run build-css && node-sass src/ -o src/ --watch --recursive",
+    "start": "npm run build-css && react-scripts build && react-scripts start",
+    "build": "npm run build-css && react-scripts build"
+  },
+  "author": "Alex Skorokhod",
+  "repository": "https://github.com/sweetca/",
+  "license": "ISC",
+  "dependencies": {
+    "axios": "^0.16.1",
+    "eslint": "^3.19.0",
+    "eslint-config-react-app": "^0.6.2",
+    "eslint-plugin-react": "^6.4.1",
+    "immutable": "^3.8.1",
+    "node-sass": "^4.5.2",
+    "react": "^15.5.4",
+    "react-dom": "^15.5.4",
+    "react-redux": "^5.0.4",
+    "react-scripts": "0.9.5",
+    "redux": "^3.6.0",
+    "redux-promise": "^0.5.3"
+  },
+  "devDependencies": {
+    "redux-logger": "^3.0.1"
+  }
+}

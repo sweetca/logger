@@ -1,0 +1,12 @@
+@import '../../app.scss';
+
+.App {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: auto;
+}
+footer {
+    @include rowBar();
+    height: $size-m;
+}
