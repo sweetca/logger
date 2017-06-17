@@ -6,11 +6,20 @@ import com.logger.domain.LogType;
  * @author askorokhod@guidewire.com
  */
 public class LogsRequest {
+    Integer id;
     LogType logType;
     Integer period;
     String user;
 
     public LogsRequest() {}
+
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
 
     public LogType getLogType() {
         return logType;

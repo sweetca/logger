@@ -6,6 +6,7 @@ import java.text.ParseException;
 import java.util.Date;
 
 public class Log {
+    private Integer id;
     private LogType logType;
     private String msg;
     public Long timestamp;
@@ -28,6 +29,14 @@ public class Log {
         } catch (ParseException e) {
             e.printStackTrace();
         }
+    }
+
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
     }
 
     public String getLogType() {
@@ -54,5 +63,10 @@ public class Log {
         }
 
         return new Log(LogType.BROKEN, data);
+    }
+
+    @Override
+    public String toString() {
+        return "id: " + id + " type: " + logType.name() + " msg: " + msg + " t: " + timestamp;
     }
 }

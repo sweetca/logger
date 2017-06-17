@@ -12,8 +12,11 @@ import javax.annotation.PostConstruct;
 import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.StandardOpenOption;
+import java.util.Arrays;
 import java.util.Date;
+import java.util.List;
 import java.util.Random;
+import java.util.stream.Collectors;
 
 @Service
 @PropertySource("classpath:application.properties")
@@ -21,29 +24,30 @@ import java.util.Random;
 public class RwFile {
 
     int tact = 0;
-    private File file;
+    private List<File> files;
 
     @Value("${files.to.watch}")
-    private String files;
+    private String fileNames;
 
     @PostConstruct
     public void init() {
-        String[] filesPath = files.trim().split(",");
-        file = new File(filesPath[0]);
+        String[] filesPath = fileNames.trim().split(",");
+        files = Arrays.stream(filesPath).map(path -> new File(path)).collect(Collectors.toList());
     }
 
     @Async
     @Scheduled(initialDelay=2000, fixedDelay=50)
     public void writeFile() {
-        try {
-            tact++;
-            String content = " rw_1_:" + tact + "\n";
-            content = Constants.DATE_FORMAT_TIME.format(new Date()) + " " + this.getRandomType() + content;
-
-            Files.write(file.toPath(), content.getBytes(), StandardOpenOption.APPEND);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        files.forEach(file -> {
+            try {
+                tact++;
+                String content = file.getName() + " rw_:" + tact + "\n";
+                content = Constants.DATE_FORMAT_TIME.format(new Date()) + " " + this.getRandomType() + content;
+                Files.write(file.toPath(), content.getBytes(), StandardOpenOption.APPEND);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        });
     }
 
     private String getRandomType() {

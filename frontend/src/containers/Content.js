@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { connect as ReduxConnect } from 'react-redux';
 import { bindActionCreators } from 'redux';
-import { connected, newLog, requestLogs, fetchLogs } from '../actions/index';
+import { connected, newLog, requestLogs, fetchLogs, fetchAvailableLogs, switchLogs } from '../actions/index';
 import Logs from '../components/log/Logs';
 import './Content.css';
 import loading from './loader.svg';
@@ -15,7 +15,7 @@ class Content extends Component {
         super(props);
         this.state = {
             realTime: true,
-            period: '5'
+            period: '60'
         };
 
         this.handleChange = this.handleChange.bind(this);
@@ -30,16 +30,23 @@ class Content extends Component {
 
                 const socket = new SockJS(api_url);
                 const stompClient = Stomp.over(socket);
-                stompClient.connect({}, (frame) => {
-                    stompClient.subscribe('/topic/log', (data) => {
-                        this.props.newLog(JSON.parse(data.body));
-                    });
-                    stompClient.subscribe('/topic/last-logs-' + userID, (data) => {
-                        this.props.fetchLogs(JSON.parse(data.body));
-                    });
-                });
+                stompClient.connect({}, () => {
 
-                this.props.connected(stompClient, userID);
+                    const availableLogsChannel = stompClient.subscribe('/topic/available-logs', (data) => {
+                        this.props.fetchAvailableLogs(JSON.parse(data.body));
+                        availableLogsChannel.unsubscribe();
+                        this.props.connected(stompClient, userID);
+
+                        stompClient.subscribe('/topic/log', (data) => {
+                            this.props.newLog(JSON.parse(data.body));
+                        });
+                        stompClient.subscribe('/topic/last-logs-' + userID, (data) => {
+                            this.props.fetchLogs(JSON.parse(data.body));
+                        });
+                    });
+
+                    stompClient.send('/app/available-logs', {}, JSON.stringify({}));
+                });
             }, 1000);
         }
     }
@@ -52,6 +59,10 @@ class Content extends Component {
             realTime: realTime,
             period: period < 1 ? '1' : this.state.period
         });
+    }
+
+    switchCurrentLog(id) {
+        this.props.switchLogs(id);
     }
 
     handleChange(event) {
@@ -68,36 +79,49 @@ class Content extends Component {
     }
 
     renderList() {
-        if (!this.props.stompClient) {
-            return (
-                <div className="loaderBox">
-                    <img src={loading} className="loader" alt="loading" />
-                </div>
-            );
-        }
-
+        const logsData = this.props.availableLogs.filter((l) => {
+            return l.id === this.props.currentLog.id;
+        })[0];
         if (this.state.realTime) {
             return (
-                <Logs logs={this.props.logs}/>
+                <Logs logs={logsData.logs}/>
             );
         } else {
             return (
-                <Logs logs={this.props.lastLogs}/>
+                <Logs logs={logsData.lastLogs}/>
             );
         }
     }
 
     render() {
+        if (!this.props.stompClient) {
+            return (
+                <div className="Content">
+                    <div className="loaderBox">
+                        <img src={loading} className="loader" alt="loading" />
+                    </div>
+                </div>
+            );
+        }
+
         return (
             <div className="Content">
+                <div className="navigation">
+                    {this.props.availableLogs.map((l) => {
+                        const cl = l.id === this.props.currentLog.id ? 'currentLogBtn' : 'logBtn';
+                        return (
+                            <a href="#" title={l.fileName} className={cl} onClick={() => this.switchCurrentLog(l.id)} key={l.id}>{l.shortName}</a>
+                        );
+                    })}
+                </div>
                 <div className="navigation">
                     {!this.state.realTime &&
                     <a href="#" className="actionBtn" onClick={() => this.switchMode(true)}>goto RealTime mode</a>
                     }
                     {!this.state.realTime &&
                     <form onSubmit={this.handleSubmit}>
-                        <label for="period">period :</label>
-                        <input id="period" value={this.state.period} onChange={this.handleChange}/>
+                        <span>period for last seconds :</span>
+                        <input value={this.state.period} onChange={this.handleChange}/>
                     </form>
                     }
                     {!this.state.realTime &&
@@ -119,13 +143,15 @@ const mapStateToProps = (state) => {
     return {
         logs: state.data.logs,
         lastLogs: state.data.lastLogs,
+        availableLogs: state.data.availableLogs,
+        currentLog: state.data.currentLog,
         stompClient: state.data.stompClient
     };
 };
 
 const mapDispatchToProps = (dispatch) => {
     return bindActionCreators(
-        { connected, newLog, requestLogs, fetchLogs },
+        { connected, newLog, requestLogs, fetchLogs, fetchAvailableLogs, switchLogs},
         dispatch
     );
 };

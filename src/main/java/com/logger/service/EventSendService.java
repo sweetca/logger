@@ -6,7 +6,6 @@ import org.springframework.context.ApplicationListener;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.messaging.simp.broker.BrokerAvailabilityEvent;
 import org.springframework.stereotype.Service;
-
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 

@@ -1,11 +1,13 @@
 package com.logger.controller;
 
-import com.logger.model.Log;
+import com.logger.model.LogConnector;
 import com.logger.model.LogsRequest;
 import com.logger.service.LogService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.handler.annotation.MessageMapping;
+import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.stereotype.Controller;
+import java.util.List;
 
 @Controller
 public class LogController {
@@ -22,9 +24,10 @@ public class LogController {
         logService.notifyLastLogsPeriod(request);
     }
 
-    @MessageMapping("/new-log")
-    public void lastLogs(Log log) throws Exception {
-        logService.storeLog(log);
+    @MessageMapping("/available-logs")
+    @SendTo("/topic/available-logs")
+    public List<LogConnector> logMap() {
+        return logService.getWatchData();
     }
 
 }

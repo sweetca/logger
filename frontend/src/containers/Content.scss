@@ -12,6 +12,7 @@
     .navigation {
         display: flex;
         flex-direction: row;
+        margin-bottom: 1em;
 
         a {
             display: flex;
@@ -54,6 +55,12 @@
             width: 20px;
             height: auto;
             align-self: center;
+        }
+        .currentLogBtn {
+            background: #00bf00;
+        }
+        .logBtn {
+            background: #acacac;
         }
     }
 
