@@ -35,7 +35,8 @@ If you work in "single file mode" it can easily monitoring changes in log that e
 
 - **server.port** is a host port here Tomcat will start
 - **bufferSize** default buffer size for back end in memory storage of logs
-- **files.to.watch** log files real path - comma separated
+- **invoke.stored.logs** invoke existing logs in file on start
+- **files.to.watch** log file real path
 - **rw.enabled** if you want to test height load of system you can enable writer bean **`RwFile.java`**
 
 **2.** Update frontend in file `~/frontend/.env`:

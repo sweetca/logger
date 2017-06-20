@@ -15,6 +15,7 @@ import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.charset.Charset;
 import java.util.Enumeration;
+import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -28,6 +29,9 @@ public class LogWatchService {
 
     @Value("${files.to.watch}")
     private String filesToWatch;
+
+    @Value("${invoke.stored.logs}")
+    private Boolean invokeLogs;
 
     private LogService logService;
 
@@ -44,7 +48,13 @@ public class LogWatchService {
                 LogConnector connector = new LogConnector();
                 connector.id = ids.incrementAndGet();
                 connector.raf = new RandomAccessFile(new File(aFilesPath), "r");
-                connector.lastSeek = connector.raf.length();
+
+                if (invokeLogs) {
+                    connector.lastSeek = 0L;
+                } else {
+                    connector.lastSeek = connector.raf.length();
+                }
+
                 connector.fileName = aFilesPath;
                 connector.shortName = aFilesPath.substring(
                         aFilesPath.lastIndexOf(
@@ -66,6 +76,7 @@ public class LogWatchService {
     public void check() throws IOException {
         Enumeration<Integer> ids = watchData.keys();
         while (ids.hasMoreElements()) {
+
             LogConnector connector = watchData.get(ids.nextElement());
 
             if ( connector.lastSeek == connector.raf.length() ) {
@@ -77,8 +88,8 @@ public class LogWatchService {
             connector.lastSeek = connector.raf.length();
             connector.raf.readFully(buffer);
 
-            Log log = Log.parseLog(new String(buffer, Charset.forName("UTF-8")));
-            logService.storeLog(log, connector.id);
+            List<Log> logs = Log.parseLogs(new String(buffer, Charset.forName("UTF-8")));
+            logService.storeLog(logs, connector.id);
         }
     }
 }

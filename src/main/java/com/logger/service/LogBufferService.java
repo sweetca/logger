@@ -31,7 +31,7 @@ public class LogBufferService {
 
         while (size >= 0 && !end) {
             Log log = logData.buffer.get(size);
-            if (log.timestamp > diff) {
+            if (log.getTimestamp() > diff) {
                 result.add(log);
             } else {
                 end = true;
@@ -49,7 +49,7 @@ public class LogBufferService {
         }
 
         Log log = new Log(entry.getLogType(), entry.getMsg());
-        log.timestamp = System.currentTimeMillis();
+        log.setTimestamp(entry.getTimestamp());
         log.setId(dataID);
         logData.buffer.add(log);
         if (logData.buffer.size() > bufferSize) {

@@ -7,11 +7,9 @@ import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
-
 import com.logger.domain.LogType;
 import com.logger.model.Log;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.boot.context.embedded.LocalServerPort;
@@ -33,7 +31,7 @@ import org.springframework.web.socket.sockjs.client.WebSocketTransport;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-public class GreetingIntegrationTests {
+public class LogIntegrationTests {
 
     @LocalServerPort
     private int port;
@@ -54,9 +52,11 @@ public class GreetingIntegrationTests {
         this.stompClient.setMessageConverter(new MappingJackson2MessageConverter());
     }
 
-    @Ignore
     @Test
-    public void logs() throws Exception {
+    public void logIntegrationTest() throws Exception {
+        Log log = new Log(LogType.ALL, "test");
+        log.setId(1);
+        log.setTimestamp(System.currentTimeMillis());
 
         final CountDownLatch latch = new CountDownLatch(1);
         final AtomicReference<Throwable> failure = new AtomicReference<>();
@@ -65,7 +65,7 @@ public class GreetingIntegrationTests {
 
             @Override
             public void afterConnected(final StompSession session, StompHeaders connectedHeaders) {
-                session.subscribe("/topic/logs", new StompFrameHandler() {
+                session.subscribe("/topic/log", new StompFrameHandler() {
                     @Override
                     public Type getPayloadType(StompHeaders headers) {
                         return Log.class;
@@ -73,9 +73,9 @@ public class GreetingIntegrationTests {
 
                     @Override
                     public void handleFrame(StompHeaders headers, Object payload) {
-                        Log log = (Log) payload;
+                        Log logFromMessage = (Log) payload;
                         try {
-                            assertEquals(LogType.INFO, log.getLogType());
+                            assertEquals(log, logFromMessage);
                         } catch (Throwable t) {
                             failure.set(t);
                         } finally {
@@ -84,8 +84,9 @@ public class GreetingIntegrationTests {
                         }
                     }
                 });
+
                 try {
-                    session.send("/app/log", new Log(LogType.ERROR, ""));
+                    session.send("/app/new-log", log);
                 } catch (Throwable t) {
                     failure.set(t);
                     latch.countDown();
@@ -93,9 +94,9 @@ public class GreetingIntegrationTests {
             }
         };
 
-        this.stompClient.connect("ws://localhost:{port}/com.logger", this.headers, handler, this.port);
+        this.stompClient.connect("ws://localhost:{port}/logger-app", this.headers, handler, this.port);
 
-        if (latch.await(3, TimeUnit.SECONDS)) {
+        if (latch.await(10, TimeUnit.SECONDS)) {
             if (failure.get() != null) {
                 throw new AssertionError("", failure.get());
             }

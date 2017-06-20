@@ -1,5 +1,6 @@
 package com.logger.controller;
 
+import com.logger.model.Log;
 import com.logger.model.LogConnector;
 import com.logger.model.LogsRequest;
 import com.logger.service.LogService;
@@ -28,6 +29,11 @@ public class LogController {
     @SendTo("/topic/available-logs")
     public List<LogConnector> logMap() {
         return logService.getWatchData();
+    }
+
+    @MessageMapping("/new-log")
+    public void newLog(Log log) throws Exception {
+        logService.storeLog(log, log.getId());
     }
 
 }
