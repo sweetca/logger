@@ -27,7 +27,11 @@ public class LogService {
         eventSendService.lastLogsNotification(logs, request.getUser());
     }
 
-    public synchronized void storeLog(Log log, Integer dataId) {
+    public synchronized void storeLog(List<Log> logs,final Integer dataId) {
+        logs.forEach(l -> this.storeLog(l, dataId));
+    }
+
+    public synchronized void storeLog(Log log,final Integer dataId) {
         Log storedLog = logBufferService.put(log, dataId);
         eventSendService.logNotification(storedLog);
     }

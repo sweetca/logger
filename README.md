@@ -34,7 +34,8 @@ If you work in "single file mode" it can easily monitoring changes in log that e
 **1.** Update up backend in file `~/src/main/resources/application.properties`:
 
 - **server.port** is a host port here Tomcat will start
-- **interval** default time period in seconds for client side sub list of logs (can be changed in UI in the fly)
+- **bufferSize** default buffer size for back end in memory storage of logs
+- **invoke.stored.logs** invoke existing logs in file on start
 - **files.to.watch** log file real path
 - **rw.enabled** if you want to test height load of system you can enable writer bean **`RwFile.java`**
 
