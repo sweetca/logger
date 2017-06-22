@@ -1,23 +1,30 @@
 package com.logger.domain;
 
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
 
 public class DateUtil {
 
-    private static final SimpleDateFormat[] SYSTEM_PATTERNS = {
-            new SimpleDateFormat("dd.MM.yyyy HH:mm:ss.SSS"), new SimpleDateFormat("dd.MM.yyyy HH:mm:ss,SSS"),
-            new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS"), new SimpleDateFormat("yyyy-MM-dd HH:mm:ss,SSS")
+    private static final DateTimeFormatter[] SYSTEM_PATTERNS = {
+            DateTimeFormat.forPattern("dd.MM.yyyy HH:mm:ss.SSS"), DateTimeFormat.forPattern("dd.MM.yyyy HH:mm:ss,SSS"),
+            DateTimeFormat.forPattern("yyyy.MM.dd HH:mm:ss.SSS"), DateTimeFormat.forPattern("yyyy.MM.dd HH:mm:ss,SSS"),
+
+            DateTimeFormat.forPattern("dd-MM-yyyy HH:mm:ss.SSS"), DateTimeFormat.forPattern("dd-MM-yyyy HH:mm:ss,SSS"),
+            DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss.SSS"), DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss,SSS"),
+
+            DateTimeFormat.forPattern("dd/MM/yyyy HH:mm:ss.SSS"), DateTimeFormat.forPattern("dd/MM/yyyy HH:mm:ss,SSS"),
+            DateTimeFormat.forPattern("yyyy/MM/dd HH:mm:ss.SSS"), DateTimeFormat.forPattern("yyyy/MM/dd HH:mm:ss,SSS")
     };
 
-    public static long detectDate(String date) throws ParseException{
+    public static synchronized long detectDate(final String date) throws ParseException{
         long timestamp;
 
-        for (SimpleDateFormat format: SYSTEM_PATTERNS) {
+        for (DateTimeFormatter format: SYSTEM_PATTERNS) {
 
             try {
-                timestamp = format.parse(date.trim()).getTime();
-            } catch (NumberFormatException e) {
+                timestamp = format.parseDateTime(date.trim()).getMillis();
+            } catch (IllegalArgumentException e) {
                 continue;
             }
 

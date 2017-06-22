@@ -1,5 +1,7 @@
 import { CONNECTED, REQUEST_LOGS, FETCH_LOGS, FETCH_AVAILABLE_LOGS, SWITCH_LOGS, NEW_LOG } from '../actions/index';
 
+const browser_limit = 400;
+
 const INIT_STATE = {
     logs: [],
     lastLogs: [],
@@ -36,7 +38,7 @@ export default (state = INIT_STATE, action) => {
                 return l.id === state.currentLog.id;
             })[0];
 
-            targetToFetch.lastLogs = action.logs;
+            targetToFetch.lastLogs = action.logs.slice(0, action.logs.length > browser_limit ? browser_limit : action.logs.length);
 
             return Object.assign({}, state, {
                 availableLogs: logsToFetch
@@ -75,9 +77,9 @@ export default (state = INIT_STATE, action) => {
                 return l.id === action.log.id;
             })[0];
 
-            let logs= [];
-            if (targetData.logs.length > 800) {
-                logs = targetData.logs.slice(400, logs.length - 1);
+            let logs = [];
+            if (targetData.logs.length > browser_limit) {
+                logs = targetData.logs.slice((browser_limit / 2), logs.length - 1);
             } else {
                 logs = targetData.logs.slice(0);
             }
