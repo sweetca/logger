@@ -3,8 +3,7 @@ package com.logger.controller;
 import com.logger.model.Log;
 import com.logger.model.LogConnector;
 import com.logger.model.LogsRequest;
-import com.logger.service.LogService;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.logger.service.ILogService;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.stereotype.Controller;
@@ -13,10 +12,9 @@ import java.util.List;
 @Controller
 public class LogController {
 
-    private LogService logService;
+    private ILogService logService;
 
-    @Autowired
-    public LogController(LogService logService) {
+    public LogController(ILogService logService) {
         this.logService = logService;
     }
 

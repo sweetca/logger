@@ -10,37 +10,42 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 @Service
-public class LogService {
+public class LogService implements ILogService {
 
-    private EventSendService eventSendService;
-    private LogBufferService logBufferService;
+    private final INotificationService notificationService;
+    private final IBufferService logBufferService;
     private ConcurrentHashMap<Integer, LogConnector> watchData;
 
     @Autowired
-    public LogService(EventSendService eventSendService, LogBufferService logBufferService) {
-        this.eventSendService = eventSendService;
+    public LogService(INotificationService notificationService, IBufferService logBufferService) {
+        this.notificationService = notificationService;
         this.logBufferService = logBufferService;
     }
 
+    @Override
     public synchronized void notifyLastLogsPeriod(LogsRequest request) {
         List<Log> logs = logBufferService.getLastPeriod(request.getPeriod(), request.getId());
-        eventSendService.lastLogsNotification(logs, request.getUser());
+        notificationService.lastLogsNotification(logs, request.getUser());
     }
 
+    @Override
     public synchronized void storeLog(List<Log> logs,final Integer dataId) {
         logs.forEach(l -> this.storeLog(l, dataId));
     }
 
+    @Override
     public synchronized void storeLog(Log log,final Integer dataId) {
         Log storedLog = logBufferService.put(log, dataId);
-        eventSendService.logNotification(storedLog);
+        notificationService.logNotification(storedLog);
     }
 
+    @Override
     public void setWatchData(ConcurrentHashMap<Integer, LogConnector> watchData) {
         this.watchData = watchData;
         logBufferService.setLogsData(watchData.keys());
     }
 
+    @Override
     public List<LogConnector> getWatchData() {
         return watchData
                 .values()

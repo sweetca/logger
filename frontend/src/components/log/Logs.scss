@@ -4,20 +4,24 @@
 
   .Log {
     display: flex;
-    flex-direction: row;
+    flex-direction: column;
     margin: 1em 0;
     min-width: 400px;
 
-    .date {
-      width: 30%;
-      min-width: 120px;
+    .title {
+      display: flex;
+      flex-direction: row;
+      min-width: 200px;
+      margin-bottom: 1em;
+
+      * {
+        font-weight: 700;
+        margin-right: 1em;
+      }
     }
-    .status {
-      width: 15%;
-      min-width: 80px;
-    }
+
     .msg {
-      width: 55%;
+      width: 100%;
       min-width: 200px;
     }
 
