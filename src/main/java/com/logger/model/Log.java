@@ -5,9 +5,11 @@ import com.logger.domain.LogType;
 import com.logger.domain.DateUtil;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
-
 import java.text.ParseException;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class Log {
@@ -66,7 +68,52 @@ public class Log {
         this.timestamp = timestamp;
     }
 
-    public static LogType detectType(String data) {
+    public static List<Log> parseLogs(String data) {
+        List<String> separateLogs = new ArrayList<>();
+        separateLogs(separateLogs, data, 0);
+
+        return separateLogs
+                .stream()
+                .map(Log::parseLog)
+                .collect(Collectors.toList());
+    }
+
+    private static final String pattern = "\\d{2,4}[/|\\-|.]\\d{2}[/|\\-|.]\\d{2,4} \\d{2}:\\d{2}:\\d{2}[.|,]\\d* *[A-Z]{0,10}";
+    private static final int pattern_size = 9;
+
+    private static int regExIndex(String text, Integer fromIndex){
+        Matcher matcher = Pattern.compile(pattern).matcher(text);
+        if ( ( fromIndex != null && matcher.find(fromIndex) ) || matcher.find()) {
+            return matcher.start();
+        }
+        return -1;
+    }
+    private static void separateLogs(List<String> result, String data, int startPosition) {
+        int logStart = regExIndex(data, startPosition);
+        int logStop = regExIndex(data, startPosition + pattern_size);
+
+        if (logStop < 1) {
+            logStop = data.length();
+        }
+
+        result.add(data.substring(logStart, logStop));
+
+        if (logStop < data.length()) {
+            separateLogs(result, data, logStop);
+        }
+    }
+
+    private static Log parseLog(String data) {
+        LogType type = Log.detectType(data);
+        String[] detected;
+
+        if (type != LogType.UNDEFINED && (detected = data.split(type.name())).length > 1) {
+            return new Log(detected[0].trim(), type, detected[1].trim());
+        }
+
+        return new Log(LogType.UNDEFINED, data);
+    }
+    private static LogType detectType(String data) {
         Map<LogType, Integer> positionMap = new HashMap<>();
         Stream.of(LogType.values()).forEach(lt -> positionMap.put(lt, data.indexOf(lt.name())));
         return positionMap
@@ -75,25 +122,8 @@ public class Log {
                 .sorted(Map.Entry.comparingByValue())
                 .filter(l -> l.getValue() > 0)
                 .findFirst()
-                .get()
-                .getKey();
-    }
-
-    public static Log parseLog(String data) {
-        LogType type = Log.detectType(data);
-        String[] detected;
-
-        if ((detected = data.split(type.name())).length > 1) {
-            return new Log(detected[0].trim(), type, detected[1].trim());
-        }
-
-        return new Log(LogType.UNDEFINED, data);
-    }
-
-    public static List<Log> parseLogs(String data) {
-        List<Log> result = new ArrayList<>();
-        Stream.of(data.split("\\n")).forEach(str -> result.add(Log.parseLog(str)));
-        return result;
+                .map(Map.Entry::getKey)
+                .orElse(LogType.UNDEFINED);
     }
 
     @Override

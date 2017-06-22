@@ -14,17 +14,16 @@ import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.charset.Charset;
-import java.util.Enumeration;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
 @Service
 @PropertySource("classpath:application.properties")
-public class LogWatchService {
+public class LogWatchService implements IWatchService {
     private static final Logger LOGGER = Logger.getLogger(LogWatchService.class);
 
-    private AtomicInteger ids = new AtomicInteger(0);
+    private final AtomicInteger ids = new AtomicInteger(0);
     private final ConcurrentHashMap<Integer, LogConnector> watchData = new ConcurrentHashMap<>();
 
     @Value("${files.to.watch}")
@@ -33,17 +32,16 @@ public class LogWatchService {
     @Value("${invoke.stored.logs}")
     private Boolean invokeLogs;
 
-    private LogService logService;
+    private ILogService logService;
 
     @Autowired
-    public LogWatchService(LogService logService) {
+    public LogWatchService(ILogService logService) {
         this.logService = logService;
     }
 
     @PostConstruct
     public void init() {
-        String[] filesPath = filesToWatch.trim().split(",");
-        for (String aFilesPath : filesPath) {
+        for (String aFilesPath : filesToWatch.trim().split(",")) {
             try {
                 LogConnector connector = new LogConnector();
                 connector.id = ids.incrementAndGet();
@@ -63,33 +61,37 @@ public class LogWatchService {
                         aFilesPath.length()
                 );
                 watchData.put(connector.id, connector);
+
+                LOGGER.debug("REGISTERED LOG : " + aFilesPath);
             } catch (IOException e) {
                 LOGGER.warn("Can not read file by path: " + filesToWatch, e);
                 throw new RuntimeException(e);
             }
         }
+
         logService.setWatchData(watchData);
     }
 
     @Async
     @Scheduled(initialDelay=1000, fixedDelay=25)
-    public void check() throws IOException {
-        Enumeration<Integer> ids = watchData.keys();
-        while (ids.hasMoreElements()) {
+    public void check() {
+        watchData.values().forEach(connector -> {
+            try {
+                if ( connector.lastSeek == connector.raf.length() ) {
+                    return;
+                }
 
-            LogConnector connector = watchData.get(ids.nextElement());
+                byte[] buffer = new byte[(int)(connector.raf.length() - connector.lastSeek)];
+                connector.raf.seek(connector.lastSeek);
+                connector.lastSeek = connector.raf.length();
+                connector.raf.readFully(buffer);
 
-            if ( connector.lastSeek == connector.raf.length() ) {
-                return;
+                List<Log> logs = Log.parseLogs(new String(buffer, Charset.forName("UTF-8")));
+                logService.storeLog(logs, connector.id);
+
+            } catch (IOException e) {
+                LOGGER.warn(e);
             }
-
-            byte[] buffer = new byte[(int)(connector.raf.length() - connector.lastSeek)];
-            connector.raf.seek(connector.lastSeek);
-            connector.lastSeek = connector.raf.length();
-            connector.raf.readFully(buffer);
-
-            List<Log> logs = Log.parseLogs(new String(buffer, Charset.forName("UTF-8")));
-            logService.storeLog(logs, connector.id);
-        }
+        });
     }
 }

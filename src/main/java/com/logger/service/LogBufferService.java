@@ -10,13 +10,14 @@ import java.util.concurrent.ConcurrentHashMap;
 
 @Service
 @PropertySource("classpath:application.properties")
-public class LogBufferService {
+public class LogBufferService implements IBufferService{
 
     @Value("${bufferSize}")
     private int bufferSize;
 
     private ConcurrentHashMap<Integer, LogData> watchData = new ConcurrentHashMap();
 
+    @Override
     public synchronized List<Log> getLastPeriod(Integer requestedInterval, Integer dataID) {
         List<Log> result = new ArrayList<>();
         LogData logData = watchData.get(dataID);
@@ -42,6 +43,7 @@ public class LogBufferService {
         return result;
     }
 
+    @Override
     public synchronized Log put(Log entry, Integer dataID) {
         LogData logData = watchData.get(dataID);
         if (logData == null) {
@@ -58,7 +60,8 @@ public class LogBufferService {
         return log;
     }
 
-    void setLogsData(Enumeration<Integer> ids) {
+    @Override
+    public void setLogsData(Enumeration<Integer> ids) {
         while (ids.hasMoreElements()) {
             Integer id = ids.nextElement();
             LogData data = new LogData();

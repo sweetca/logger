@@ -12,27 +12,32 @@ import javax.annotation.PostConstruct;
 import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.StandardOpenOption;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Random;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Service
 @PropertySource("classpath:application.properties")
 @ConditionalOnExpression("${rw.enabled:true}")
 public class RwFile {
 
-    int tact = 0;
+    private final AtomicInteger step = new AtomicInteger(0);
     private List<File> files;
 
     @Value("${files.to.watch}")
     private String fileNames;
+    @Value("${logging.file}")
+    private String appLog;
 
     @PostConstruct
     public void init() {
-        String[] filesPath = fileNames.trim().split(",");
-        files = Arrays.stream(filesPath).map(path -> new File(path)).collect(Collectors.toList());
+        files = Stream.of(fileNames.split(","))
+                .filter(name -> !name.endsWith(appLog))
+                .map(File::new)
+                .collect(Collectors.toList());
     }
 
     @Async
@@ -40,8 +45,7 @@ public class RwFile {
     public void writeFile() {
         files.forEach(file -> {
             try {
-                tact++;
-                String content = file.getName() + " rw_:" + tact + "\n";
+                String content = " " + file.getName() + " rw_: " + step.incrementAndGet() + System.getProperty("line.separator");
                 content = Constants.DATE_FORMAT_TIME.format(new Date()) + " " + this.getRandomType() + content;
                 Files.write(file.toPath(), content.getBytes(), StandardOpenOption.APPEND);
             } catch (Exception e) {
@@ -52,17 +56,8 @@ public class RwFile {
 
     private String getRandomType() {
         Random ran = new Random();
-        int x = ran.nextInt(3);
-        LogType type = LogType.INFO;
-        switch (x) {
-            case 2:
-                type = LogType.WARNING;
-                break;
-            case 1:
-                type = LogType.ERROR;
-                break;
-        }
-
+        int x = ran.nextInt(LogType.values().length - 1);
+        LogType type = LogType.values()[x];
         return type.name();
     }
 }

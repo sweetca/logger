@@ -14,11 +14,13 @@ public class DateUtil {
         long timestamp;
 
         for (SimpleDateFormat format: SYSTEM_PATTERNS) {
+
             try {
                 timestamp = format.parse(date.trim()).getTime();
-            } catch (ParseException e) {
+            } catch (NumberFormatException e) {
                 continue;
             }
+
             return timestamp;
         }
 
