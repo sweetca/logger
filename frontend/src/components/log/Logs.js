@@ -2,6 +2,10 @@ import React, { Component } from 'react';
 import './Logs.css';
 
 class Log extends Component {
+    shouldComponentUpdate(nextProps, nextState) {
+        return this.props.log.timestamp !== nextProps.log.timestamp || this.props.log.msg !== nextProps.log.msg;
+    }
+
     render() {
         const logStyle = this.props.log.logType.charAt(0);
         let style;
@@ -10,6 +14,9 @@ class Log extends Component {
                 style = 'error';
                 break;
             case 'W':
+                style = 'warn';
+                break;
+            case 'F':
                 style = 'warn';
                 break;
             default:
@@ -31,7 +38,7 @@ class Logs extends Component {
         return (
             <div className="Logs">
                 {this.props.logs.map((l) => {
-                    return (<Log key={l.timestamp} log={l}/>);
+                    return (<Log key={l.timestamp + '-' + Math.random()} log={l}/>);
                 })}
             </div>
         );
