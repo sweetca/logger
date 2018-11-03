@@ -1,4 +1,6 @@
 # [Logs Monitor](https://github.com/sweetca/logger)
+[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fsweetca%2Flogger.svg?type=shield)](https://app.fossa.io/projects/git%2Bgithub.com%2Fsweetca%2Flogger?ref=badge_shield)
+
 
 ## License 
 **MIT License**
@@ -7,6 +9,9 @@ This application can be usefull for reading logs on server in real time.
 Main possibilities here : fast set up and start on server, friendly UI with real time update support!
 
 If you work in "single file mode" it can easily monitoring changes in log that even faster that 100ms 
+
+
+[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fsweetca%2Flogger.svg?type=large)](https://app.fossa.io/projects/git%2Bgithub.com%2Fsweetca%2Flogger?ref=badge_large)
 
 ## Requirements :
 **1.** java 8
