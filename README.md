@@ -1,5 +1,7 @@
 # [Logs Monitor](https://github.com/sweetca/logger)
 
+[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fsweetca%2Flogger.svg?type=shield)](https://app.fossa.io/projects/git%2Bgithub.com%2Fsweetca%2Flogger?ref=badge_shield)
+
 ## License 
 **MIT License**
 
